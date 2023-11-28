@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html ng-app="eventsApp">
+<head>
+    <title>Events Happening</title>
+    <center>
+        <h1>EVENTS HAPPENING-2023</h1>
+    </center>
+    <div class="dropdown">
+        <span>Menu &#9660;</span>
+        <div class="dropdown-content">
+            <a href="home.html">Home</a>
+            <a href="login.html">Login</a>
+            <a href="event.html">Events</a>
+            <a href="addtasks.html">Add Tasks</a>
+            <a href="feedback.html">Feedback</a>
+        </div>
+    </div>
+    <br>
+    <br>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: cadetblue;
+            color: white;
+        }
+
+        .event-list {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .event-card {
+            flex: 1 1 calc(33.33% - 20px);
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .event-card:hover {
+            background-color: #808080;
+        }
+
+        .event-card h4 {
+            margin-top: 0;
+        }
+
+        .event-details {
+            display: none;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+            color: black;
+        }
+
+        .show-details {
+            display: block;
+        }
+
+        .event-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .remove-button {
+            margin-top: 5px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-event-form {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .add-event-form input[type="text"],
+        .add-event-form input[type="date"],
+        .add-event-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .add-event-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        .upcoming-event {
+            background-color: green; /* Green */
+        }
+
+        .expired-event {
+            background-color: red; /* Red */
+        }
+
+        /* Dropdown container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Content (hidden by default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333; /* Background color for the dropdown */
+            min-width: 160px;
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Change color on hover */
+        .dropdown-content a:hover {
+            background-color: #555;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body ng-controller="eventsController">
+    <div class="event-list">
+        <div class="event-card" ng-repeat="event in events" ng-click="toggleDetails(event)" ng-class="{ 'upcoming-event': isUpcoming(event.date), 'expired-event': isExpired(event.date) }">
+            <h4>{{ event.name }}</h4>
+            <img class="event-image" ng-src="{{ event.image }}" alt="{{ event.name }} Image">
+            <p>Date: {{ event.date }}</p>
+            <p>Location: {{ event.location }}</p>
+            <div class="event-details" ng-class="{ 'show-details': event.showDetails }">
+                <p>Description: {{ event.description }}</p>
+                <p>Time: {{ event.time }}</p>
+                <button class="remove-button" ng-click="removeEvent(event)">Remove</button>
+            </div>
+        </div>
+        <br>
+    </div>
+    <center><p> For Adding new events, fill the below details</p></center>
+    <div class="add-event-form">
+        <h3><center> Add New Event </center></h3>
+        <form name="newEventForm" ng-submit="addNewEvent()" novalidate>
+            <div>
+                <label>Name:</label>
+                <input type="text" ng-model="newEvent.name" required>
+            </div>
+            <div>
+                <label>Date:</label>
+                <input type="date" ng-model="newEvent.date" required>
+            </div>
+            <div>
+                <label>Location:</label>
+                <input type="text" ng-model="newEvent.location" required>
+            </div>
+            <div>
+                <label>Description:</label>
+                <textarea ng-model="newEvent.description" required></textarea>
+            </div>
+            <div>
+                <label>Time:</label>
+                <input type="text" ng-model="newEvent.time" required>
+            </div>
+            <div>
+                <label>Image (URL):</label>
+                <input type="text" ng-model="newEvent.image" required>
+            </div>
+            <div>
+                <label>Event Status:</label>
+                <input type="checkbox" ng-model="newEvent.isUpcoming">
+            </div>
+            <button type="submit">Add Event</button>
+        </form>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        angular.module('eventsApp', [])
+            .controller('eventsController', function ($scope, EventService) {
+                $scope.events = EventService.getEvents();
+
+                $scope.toggleDetails = function (event) {
+                    event.showDetails = !event.showDetails;
+                };
+
+                $scope.removeEvent = function (event) {
+                    EventService.removeEvent(event);
+                };
+
+                $scope.addNewEvent = function () {
+                    if ($scope.newEventForm.$valid) {
+                        $scope.newEvent.isUpcoming = $scope.isUpcoming($scope.newEvent.date);
+                        EventService.addEvent(angular.copy($scope.newEvent));
+                        $scope.newEventForm.$setPristine();
+                        $scope.newEventForm.$setUntouched();
+                        $scope.newEvent = {};
+                        $http.post('/addEvent', $scope.newEvent)
+                        .then(function (response) {
+                            console.log("success");
+                        })
+                        .catch(function (error) {
+                            alert("Error :" + error.data[0]);
+                        });
+                    }
+                };
+
+                $scope.isUpcoming = function (eventDate) {
+                    var today = new Date().toISOString().slice(0, 10);
+                    return eventDate >= today;
+                };
+
+                $scope.isExpired = function (eventDate) {
+                    var today = new Date().toISOString().slice(0, 10);
+                    return eventDate < today;
+                };
+            })
+            .factory('EventFactory', function () {
+                return {
+                    createEvent: function (name, date, location, description, time, image) {
+                        return {
+                            name: name,
+                            date: date,
+                            location: location,
+                            description: description,
+                            time: time,
+                            image: image,
+                            showDetails: false
+                        };
+                    }
+                };
+            })
+            .service('EventService', function (EventFactory) {
+                var events = [
+                    {
+                        name: "Tech Conference",
+                        date: "2023-08-15",
+                        location: "City Convention Center",
+                        description: "A conference on the latest tech trends.",
+                        time: "09:00 AM",
+                        image: "conference.jpeg",
+                        showDetails: false
+                    },
+                    {
+                        name: "Web Seminars",
+                        date: "2023-10-25",
+                        location: "Central Park",
+                        description: "Hands on experiencing on web topics.",
+                        time: "04:00 PM",
+                        image: "https://media.istockphoto.com/id/1124557189/photo/woman-giving-presentation-to-team.jpg?s=612x612&w=0&k=20&c=mwCfqM2Kt6y0VUHvQ1vVA2N7AEDczkqBBSYyD0RbTQw=",
+                        showDetails: false
+                    },
+                    {
+                        name: "Tech Workshop",
+                        date: "2023-09-05",
+                        location: "Space Tech",
+                        description: "Showcasing local Development works.",
+                        time: "06:00 PM",
+                        image: "https://media.istockphoto.com/id/1312139041/photo/learning-on-the-job.jpg?s=612x612&w=0&k=20&c=KmGoZhp92ukKgYCtxulX9yViM1aQTtYtq-pvLr7Q2TA=",
+                        showDetails: false
+                    }
+                ];
+
+                this.getEvents = function () {
+                    return events;
+                };
+
+                this.removeEvent = function (event) {
+                    const index = events.indexOf(event);
+                    if (index !== -1) {
+                        events.splice(index, 1);
+                    }
+                };
+
+                this.addEvent = function (newEvent) {
+                    newEvent.showDetails = false;
+                    events.unshift(newEvent);
+                };
+            });
+    </script>
+</body>
+</html>
+

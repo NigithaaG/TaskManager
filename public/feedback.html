@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html ng-app="feedbackApp">
+<head>
+    <title>Feedback Form</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color:  cadetblue;
+	   
+        }
+        .feedback-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        .star-rating {
+            color: #f7d40f;
+            font-size: 24px;
+        }
+        
+        .star-inactive {
+            color: #ccc;
+        }
+
+        .feedback-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.feedback-card {
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    background-color: #f4f4f4;
+    transition: transform 0.2s;
+}
+
+.feedback-card:hover {
+    transform: scale(1.05);
+}
+
+.card-content {
+    padding: 10px;
+}
+
+.name {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.email {
+    font-size: 14px;
+    color: #555;
+}
+
+.rating {
+    font-weight: bold;
+    color: #f7d40f;
+}
+
+.comments {
+    margin-top: 10px;
+}
+
+        
+    </style>
+</head>
+<body ng-controller="feedbackController">
+    <div class="container feedback-form">
+        <h2>Feedback Form</h2>
+        <form>
+            <div class="form-group">
+                <label for="name">Your Name:</label>
+                <input type="text" id="name" class="form-control" ng-model="feedback.name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" class="form-control" ng-model="feedback.email" required>
+            </div>
+            <div class="form-group">
+                <label for="rating">Rating:</label>
+                <star-rating ng-model="feedback.rating" max="5"></star-rating>
+            </div>
+            <div class="form-group">
+                <label for="comments">Comments:</label>
+                <textarea id="comments" class="form-control" ng-model="feedback.comments"></textarea>
+            </div>
+            <button class="btn btn-primary" ng-click="submitFeedback()">Submit</button>
+        </form>
+<div class="success-message" ng-if="showSuccessMessage">
+           <center> Feedback submitted successfully!! </center>
+        </div>
+    </div>
+    
+        <div class="feedback-cards">
+            <div class="feedback-card" ng-repeat="feedbackItem in feedbackList">
+                <div class="card-content">
+                    <div class="name">{{ feedbackItem.name }}</div>
+                    <div class="email">{{ feedbackItem.email }}</div>
+                    <div class="rating">Rating: {{ feedbackItem.rating }}</div>
+                    <div class="comments">{{ feedbackItem.comments }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        angular.module('feedbackApp', [])
+            .directive('starRating', function () {
+                return {
+                    restrict: 'E',
+                    template: `
+                        <i ng-repeat="star in stars track by $index"
+                            class="glyphicon"
+                            ng-class="starClass($index)"
+                            ng-click="toggle($index)">
+                        </i>
+                    `,
+                    scope: {
+                        ngModel: '=',
+                        max: '@'
+                    },
+                    link: function (scope) {
+                        scope.stars = [];
+                        for (var i = 0; i < scope.max; i++) {
+                            scope.stars.push({ filled: false });
+                        }
+
+                        scope.starClass = function (index) {
+                            return {
+                                'glyphicon-star': scope.stars[index].filled,
+                                'glyphicon-star-empty': !scope.stars[index].filled,
+                                'star-rating': true,
+                                'star-inactive': !scope.stars[index].filled
+                            };
+                        };
+
+                        scope.toggle = function (index) {
+                            for (var i = 0; i < scope.max; i++) {
+                                scope.stars[i].filled = i <= index;
+                            }
+                            scope.ngModel = index + 1; 
+                        };
+                    }
+                };
+            })
+            .controller('feedbackController', function ($scope, $http) {
+            $scope.feedback = {
+                name: '',
+                email: '',
+                rating: 0,
+                comments: ''
+            };
+            $scope.showSuccessMessage = false;
+            $scope.feedbackList = []; 
+
+            $scope.submitFeedback = function () {
+                $http.post('/api/feedback', $scope.feedback)
+                    .then(function (response) {
+                        console.log('Submitted Feedback:', response.data);
+                        $scope.showSuccessMessage = true;
+                        $scope.feedbackList.push(response.data); 
+                        $scope.feedback = {
+                            name: '',
+                            email: '',
+                            rating: 0,
+                            comments: ''
+                        };
+                    })
+                    .catch(function (error) {
+                        console.error('Error submitting feedback:', error);
+                    });
+            };
+        });
+    </script>    
+</body>
+</html>

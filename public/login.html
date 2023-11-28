@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>Login Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+</head>
+<body ng-controller="LoginController" style="background-color: cadetblue;">
+    <div class="container h-100">
+        <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+            <div class="d-table-cell align-middle">
+
+                <div class="text-center mt-4">
+                    <h1 class="h2" style="color: white;">Welcome back</h1>
+                    <p class="lead" style="color: white;">
+                        Sign in to your account to continue
+                    </p>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="m-sm-4">
+                            <div class="text-center">
+                                <img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="Andrew Jones" class="img-fluid rounded-circle" width="132" height="132">
+                            </div>
+                            <form>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email">
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your password">
+                                    <small><a href="pages-reset-password.html">Forgot password?</a></small>
+                                </div>
+                                <div>
+                                    <div class="custom-control custom-checkbox align-items-center">
+                                        <input type="checkbox" class="custom-control-input" value="remember-me" name="remember-me" checked="">
+                                        <label class="custom-control-label text-small">Remember me next time</label>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-lg btn-primary" ng-click="login()">Sign in</button>
+                                    <p ng-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
+                                </div>
+                                
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+    <script>
+        var app = angular.module("myApp", []);
+        app.controller("LoginController", function($scope, $http, $window) {
+            $scope.login = function() {
+                var userData = {
+                    email: $scope.email,
+                    password: $scope.password
+                };
+                
+                $http.post('/login', userData)
+                .then(function(response) {
+                if (response.data.success) {
+                    $window.location.href = 'event.html';
+                } else {
+                    $scope.errorMessage = 'Invalid email or password';
+                }
+            })
+            .catch(function(error) {
+                $scope.errorMessage = 'An error occurred while processing your request';
+            });
+        };
+    });
+    </script>
+</body>
+</html>
