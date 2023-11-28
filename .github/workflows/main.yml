@@ -24,6 +24,10 @@ jobs:
       - name: Build
         run: node server.js  # Adjust this command based on your project
 
+      - name: Debug Git Environment
+        run: git config --global --list
+
+
   deploy:
     runs-on: ubuntu-latest
 
