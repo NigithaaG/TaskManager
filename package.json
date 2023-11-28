@@ -1,10 +1,11 @@
 {
   "name": "login",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is a simple Task Management Application built with Angular.js for the frontend and Node.js with MongoDB for the backend.",
   "main": "login.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
