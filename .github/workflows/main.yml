@@ -35,5 +35,5 @@ jobs:
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{ secrets.a54b8261-c323-428b-bfad-0bdf6cc90d66 }}
-          heroku_app_name: Nigithaa G
+          heroku_app_name: Nigithaa 
           heroku_email: nigithaa@student.tce.edu
